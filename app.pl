@@ -16,27 +16,27 @@ use HTTP::CookieJar::LWP;
 use Mozilla::CA;
 use Data::Dumper;
 
+my $start = time();
+
 sub getConfig {
   local $/ = '';
   open CONF, 'config.json' or die "Can't open config file!";
   my $j = decode_json(<CONF>);
   return $j;
 }
+
 my $conf = getConfig();
 my $rules_file = 'mapping-rules/default.json';
 
 my @refeps = ('contributor-name-types','contributor-types','alternative-title-types','classification-types','electronic-access-relationships',,'identifier-types','instance-formats','instance-note-types','instance-relationship-types','instance-statuses','instance-types','modes-of-issuance','nature-of-content-terms','statistical-code-types','statistical-codes','hrid-settings-storage/hrid-settings');
 
-# @refeps = ('hrid-settings-storage/hrid-settings');
-
 my @hrefeps = ('call-number-types','holdings-note-types','holdings-types','holdings-sources','ill-policies','item-damaged-statuses','item-note-types','loan-types','locations','material-types','service-points','shelf-locations',);
 
 my $hrid_conf = {};
-
+my $tenant = $conf->{tenant};
 sub getRefData {
   my $refobj = {};
   my $okapi = $conf->{okapi};
-  my $tenant = $conf->{tenant};
   my $user = $conf->{username};
   my $pass = $conf->{password}; 
   my $url = "$okapi/authn/login-with-expiry";
@@ -93,7 +93,7 @@ sub getRefData {
   }
  return $refobj;
 }
-print "Getting reference data...\n";
+# print "Getting reference data...\n";
 my $refdata = getRefData();
 # print Dumper ($refdata); exit;
 # print Dumper ($hrid_conf); exit;
@@ -102,7 +102,6 @@ my $ver = 1;
 binmode STDOUT, ":utf8";
 $| = 1;
 
-my $isil = 'x';
 my $srstype = 'MARC';
 my $source_id = 'f32d531e-df79-46b3-8932-cdd35f7a2264'; # Folio 
 
@@ -117,20 +116,9 @@ $json->canonical();
 my @lt = localtime();
 my $mdate = sprintf("%04d-%02d-%02dT%02d:%02d:%02d-0500", $lt[5] + 1900, $lt[4] + 1, $lt[3], $lt[2], $lt[1], $lt[0]);
 
-my $files = {
-  inst => 'instances.jsonl',
-  holds => 'holdings.jsonl',
-  items => 'items.jsonl',
-  imap => 'map.tsv',
-  srs => 'srs.jsonl',
-  snap => 'snapshot.jsonl',
-  presuc => 'presuc.jsonl',
-  err => 'err.mrc'
-};
-
 sub uuid {
   my $text = shift;
-  my $uuid = create_uuid_as_string(UUID_V5, $text . $isil);
+  my $uuid = create_uuid_as_string(UUID_V5, $text . $tenant);
   return $uuid;
 }
 
@@ -445,59 +433,43 @@ foreach (keys %{ $mapping_rules }) {
   }
 }
 
-my $bwmain = {};
+my $resp = {
+  instances => [],
+  srs => [],
+  snapshots => [],
+  relationships => [],
+  pst => [],
+  stats => { instances=>0, srs=>0, snapshots=>0, relationships=>0, pst=>0, errors=>0 }
+};
+
 foreach (@ARGV) {
   my $infile = $_;
   if (! -e $infile) {
     die "Can't find raw Marc file!"
   } 
   
-  my $count = 0;
-  my $icount = 0;
-  my $hcount = 0;
-  my $errcount = 0;
-  my $pcount = 0;
-  my $rcount = 0;
-  my $bwcount = 0;
-  my $start = time();
 
   my $dir = dirname($infile);
   my $fn = basename($infile, '.mrc', '.marc', '.out');
 
-  my $paths = {};
-  foreach (keys %{ $files }) {
-    my $suf = $files->{$_};
-    my $save_file = "$dir/$fn-$suf";
-    unlink $save_file;
-    $paths->{$_} = $save_file;
-  }
-
-  open my $HOUT, ">>:encoding(UTF-8)", $paths->{holds};
-  # open my $HSRSOUT, ">>:encoding(UTF-8)", $paths->{hsrs};
-  open my $IOUT, ">>:encoding(UTF-8)", $paths->{items};
-  open my $PSOUT, ">>:encoding(UTF-8)", $paths->{presuc};
-  open my $ROUT, ">>:encoding(UTF-8)", $paths->{relate};
-  open my $BWOUT, ">>:encoding(UTF-8)", $paths->{bwp};
-
-  my $snapshot_id = make_snapshot($paths->{snap});
+  my $snapshot = make_snapshot();
+  my $snapshot_id = $snapshot->{jobExecutionId};
+  push @{ $resp->{snapshots} }, $snapshot;
+  $resp->{stats}->{snapshots}++;
   
   # open a collection of raw marc records
   $/ = "\x1D";
  
   open RAW, "<:encoding(UTF-8)", $infile;
-  open my $OUT, ">>:encoding(UTF-8)", $paths->{inst};
-  open my $SRSOUT, ">>:encoding(UTF-8)", $paths->{srs};
-  open IDMAP, ">>:encoding(UTF-8)", $paths->{imap};
   my $inst_recs;
   my $srs_recs;
   my $hrecs;
-  # my $hsrs;
   my $irecs;
-  my $idmap_lines;
-  my $success = 0;
+  my $count = 0;
   my $hrids = {};
   my $rec;
   while (<RAW>) {
+    $count++;
     my $raw = $_;
     $rec = {
       id => '',
@@ -527,7 +499,6 @@ foreach (@ARGV) {
       instanceTypeId => ''
     };
     my $relid = '';
-    $count++;
     my $marc = eval {
       MARC::Record->new_from_usmarc($raw);
     };
@@ -710,33 +681,20 @@ foreach (@ARGV) {
     }
     my $hrid = $rec->{hrid};
     if (!$hrids->{$hrid} && $marc->title()) {
-      my $f908 = $marc->field('908');
-      if ($f908 && $f908->subfield('x') && $f908->subfield('x') eq 'Y') {
-        $rec->{discoverySuppress} = JSON::true;
-      }
-      # set FOLIO_USER_ID environment variable to create the following metadata object.
-      $rec->{id} = uuid($hrid);
-      $rec->{_version} = $ver;
-      if ($ENV{FOLIO_USER_ID}) {
-        $rec->{metadata} = {
-          createdByUserId=>$ENV{FOLIO_USER_ID},
-          updatedByUserId=>$ENV{FOLIO_USER_ID},
-          createdDate=>$mdate,
-          updatedDate=>$mdate
-        };
-      }
+      
       if ($relid) {
         my $superid = uuid($relid);
         my $rtype = $refdata->{instanceRelationshipTypes}->{'bound-with'};
         my $relobj = { superInstanceId=>$superid, subInstanceId=>$rec->{id}, instanceRelationshipTypeId=>$rtype };
-        print $ROUT $json->encode($relobj) . "\n";
-        $rcount++;
+        push @{ $resp->{relationships} }, $relobj;
+        $resp->{stats}->{relationships}++;
       }
-      $inst_recs .= $json->encode($rec) . "\n";
-      $srs_recs .= $json->encode(make_srs($srsmarc, $raw, $rec->{id}, $rec->{hrid}, $snapshot_id)) . "\n";
-      $idmap_lines .= "$rec->{hrid}\t$rec->{id}\n";
+      push @{ $resp->{instances} }, $rec;
+      my $srs = make_srs($srsmarc, $raw, $rec->{id}, $rec->{hrid}, $snapshot_id);
+      push @{ $resp->{srs} }, $srs;
       $hrids->{$hrid} = 1;
-      $success++;
+      $resp->{stats}->{instances}++;
+      $resp->{stats}->{srs}++;
 
       # make preceding succeding titles
       foreach my $f ($marc->field('78[05]')) {
@@ -773,8 +731,8 @@ foreach (@ARGV) {
             push @{ $presuc->{identifiers} }, $idObj;
           }
         }
-        write_objects($PSOUT, $json->encode($presuc) . "\n");
-        $pcount++;
+        push @{ $resp->{pst} }, $presuc;
+        $resp->{stats}->{pst}++;
       } 
     } else {
       if ($hrids->{$hrid}) {
@@ -783,52 +741,14 @@ foreach (@ARGV) {
       if (!$rec->{title}) {
         print "ERROR $hrid has no title\n"
       }
-      open ERROUT, ">>:encoding(UTF-8)", $paths->{err};
-      print ERROUT $raw;
-      close ERROUT;
-      $errcount++;
+      $resp->{stats}->{errors}++;
     }
   }
-  if (eof RAW || $success % 10000 == 0) {
-    my $tt = time() - $start;
-    print "Processed #$count (" . $rec->{hrid} . ") [ instances: $success, holdings: $hcount, items: $icount, time: $tt secs ]\n" if $rec->{hrid};
-    write_objects($OUT, $inst_recs);
-    $inst_recs = '';
 
-    write_objects($SRSOUT, $srs_recs);
-    $srs_recs = '';
-
-    print IDMAP $idmap_lines;
-    $idmap_lines = '';
-
-    if ($hrecs) {
-      print $HOUT $hrecs;
-      $hrecs = '';
-    }
-
-    # if ($hsrs) {
-    #  print $HSRSOUT $hsrs;
-    #  $hsrs = '';
-    # }
-
-    if ($irecs) {
-      print $IOUT $irecs;
-      $irecs = '';
-    }
-  }
   my $tt = time() - $start;
-  print "\nDone!\n$count Marc records processed in $tt seconds";
-  print "\nInstances:   $success ($paths->{inst})";
-  print "\nHoldings:    $hcount ($paths->{holds})";
-  print "\nItems:       $icount ($paths->{items})";
-  print "\nPre-suc:     $pcount ($paths->{presuc})";
-  print "\nErrors:      $errcount\n";
-}
-
-sub write_objects {
-  my $fh = shift;
-  my $recs = shift;
-  print $fh $recs if $recs;
+  $resp->{stats}->{total} = $count;
+  $resp->{stats}->{timeSeconds} = $tt;
+  print $json->pretty->encode($resp);
 }
 
 sub dedupe {
@@ -853,11 +773,7 @@ sub make_snapshot {
     status=>"COMMITTED",
     processingStartedDate=>"${dt}T00:00:00"
   };
-  print "Saving snapshot object to $snap_path...\n";
-  open SNOUT, ">$snap_path";
-  print SNOUT JSON->new->encode($snap) . "\n";
-  close SNOUT;
-  return $snap_id;
+  return $snap;
 }
 
 sub make_srs {
