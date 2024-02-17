@@ -17,6 +17,7 @@ use Mozilla::CA;
 use Data::Dumper;
 
 my $start = time();
+my $cacheDir = 'cache';
 
 sub getConfig {
   local $/ = '';
@@ -29,11 +30,30 @@ my $conf = getConfig();
 my $rules_file = 'mapping-rules/default.json';
 
 my @refeps = ('contributor-name-types','contributor-types','alternative-title-types','classification-types','electronic-access-relationships',,'identifier-types','instance-formats','instance-note-types','instance-relationship-types','instance-statuses','instance-types','modes-of-issuance','nature-of-content-terms','statistical-code-types','statistical-codes','hrid-settings-storage/hrid-settings');
-
+# @refeps = ('locations');
 my @hrefeps = ('call-number-types','holdings-note-types','holdings-types','holdings-sources','ill-policies','item-damaged-statuses','item-note-types','loan-types','locations','material-types','service-points','shelf-locations',);
 
 my $hrid_conf = {};
 my $tenant = $conf->{tenant};
+my $cachePath = "$cacheDir/$tenant";
+
+sub putCache {
+  my $refobj = shift;
+  mkdir $cacheDir unless (-e $cacheDir);
+  open CAC, '>', "$cachePath" or print "WARN Can't open cache for $tenant!\n";
+  print CAC encode_json($refobj);
+}
+
+sub getCache {
+  my $fn = shift;
+  local $/ = '';
+  open CF, "<", $fn or return '';
+  my $reftxt = <CF>;
+  close CF;
+  my $refobj = decode_json($reftxt);
+  return $refobj;
+}
+
 sub getRefData {
   my $refobj = {};
   my $okapi = $conf->{okapi};
@@ -93,8 +113,12 @@ sub getRefData {
   }
  return $refobj;
 }
-# print "Getting reference data...\n";
-my $refdata = getRefData();
+my $refdata = getCache($cachePath);
+if (!$refdata) {
+  $refdata = getRefData() if !$refdata;
+  putCache($refdata);
+}
+
 # print Dumper ($refdata); exit;
 # print Dumper ($hrid_conf); exit;
 
