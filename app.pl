@@ -10,11 +10,15 @@ use UUID::Tiny ':std';
 use MARC::Charset 'marc8_to_utf8';
 use Time::Piece;
 use File::Basename;
-use HTTP::Server::Simple;
 use LWP::UserAgent;
 use HTTP::CookieJar::LWP;
 use Mozilla::CA;
 use Data::Dumper;
+
+my $port = '8888';
+my $pid = OUF::API::Server->new($port)->background();
+# print "PID: $pid\n";
+
 
 my $start = time();
 my $cacheDir = 'cache';
@@ -168,9 +172,8 @@ my $srstype = 'MARC';
 my $source_id = 'f32d531e-df79-46b3-8932-cdd35f7a2264'; # Folio 
 
 if (! $ARGV[0]) {
-  die "Usage: ./marc2inst-neco.pl  <raw_marc_files>\n";
+  # die "Usage: ./marc2inst-neco.pl  <raw_marc_files>\n";
 }
-my $dir = dirname($ARGV[0]);
 
 my $json = JSON->new;
 $json->canonical();
@@ -433,86 +436,85 @@ sub processing_funcs {
   return $out;
 }
 
-my $mapping_rules = getRules($rules_file);
+# my $infile = shift;
+# mapper($infile);
 
-my $ftypes = {
-  id => 'string',
-  hrid => 'string',
-  source => 'string',
-  title => 'string',
-  indexTitle => 'string',
-  alternativeTitles => 'array.object',
-  editions => 'array',
-  series => 'array.object',
-  identifiers => 'array.object',
-  contributors => 'array.object',
-  subjects => 'array.object',
-  classifications => 'array.object',
-  publication => 'array.object',
-  publicationFrequency => 'array',
-  publicationRange => 'array',
-  electronicAccess => 'array.object',
-  instanceTypeId => 'string',
-  instanceFormatIds => 'array',
-  physicalDescriptions => 'array',
-  languages => 'array',
-  notes => 'array.object',
-  modeOfIssuanceId => 'string',
-  catalogedDate => 'string',
-  previouslyHeld => 'boolean',
-  staffSuppress => 'boolean',
-  discoverySuppress => 'boolean',
-  statisticalCodeIds => 'array',
-  sourceRecordFormat => 'string',
-  statusId => 'string',
-  statusUpdatedDate => 'string',
-  tags => 'object',
-  holdingsRecords2 => 'array.object',
-  natureOfContentTermIds => 'array.string'
-};
+sub mapper {
+  my $infile = shift || '';
+  my $mapping_rules = getRules($rules_file);
 
-# We need to know upfront which tags support repeated subfields or require preprocessing (think 880s).
-my $field_replace = {};
-my $repeat_subs = {};
-foreach (keys %{ $mapping_rules }) {
-  my $rtag = $_;
-  foreach (@{ $mapping_rules->{$rtag} }) {
-    if ($_->{entityPerRepeatedSubfield}) {
-      my $conf = $_;
-      foreach (@{ $conf->{entity} }) {
-        push @{ $repeat_subs->{$rtag} }, $_->{subfield}->[0] if $_->{target} !~ /Id$/;
+  my $ftypes = {
+    id => 'string',
+    hrid => 'string',
+    source => 'string',
+    title => 'string',
+    indexTitle => 'string',
+    alternativeTitles => 'array.object',
+    editions => 'array',
+    series => 'array.object',
+    identifiers => 'array.object',
+    contributors => 'array.object',
+    subjects => 'array.object',
+    classifications => 'array.object',
+    publication => 'array.object',
+    publicationFrequency => 'array',
+    publicationRange => 'array',
+    electronicAccess => 'array.object',
+    instanceTypeId => 'string',
+    instanceFormatIds => 'array',
+    physicalDescriptions => 'array',
+    languages => 'array',
+    notes => 'array.object',
+    modeOfIssuanceId => 'string',
+    catalogedDate => 'string',
+    previouslyHeld => 'boolean',
+    staffSuppress => 'boolean',
+    discoverySuppress => 'boolean',
+    statisticalCodeIds => 'array',
+    sourceRecordFormat => 'string',
+    statusId => 'string',
+    statusUpdatedDate => 'string',
+    tags => 'object',
+    holdingsRecords2 => 'array.object',
+    natureOfContentTermIds => 'array.string'
+  };
+
+  # We need to know upfront which tags support repeated subfields or require preprocessing (think 880s).
+  my $field_replace = {};
+  my $repeat_subs = {};
+  foreach (keys %{ $mapping_rules }) {
+    my $rtag = $_;
+    foreach (@{ $mapping_rules->{$rtag} }) {
+      if ($_->{entityPerRepeatedSubfield}) {
+        my $conf = $_;
+        foreach (@{ $conf->{entity} }) {
+          push @{ $repeat_subs->{$rtag} }, $_->{subfield}->[0] if $_->{target} !~ /Id$/;
+        }
       }
-    }
-    if ($_->{fieldReplacementBy3Digits}) {
-      my $frules = {};
-      foreach (@{ $_->{fieldReplacementRule} }) {
-        $frules->{$_->{sourceDigits}} = $_->{targetField};
+      if ($_->{fieldReplacementBy3Digits}) {
+        my $frules = {};
+        foreach (@{ $_->{fieldReplacementRule} }) {
+          $frules->{$_->{sourceDigits}} = $_->{targetField};
+        }
+        $_->{frules} = $frules;
+        $field_replace->{$rtag} = $_;
+        delete $mapping_rules->{$rtag};
       }
-      $_->{frules} = $frules;
-      $field_replace->{$rtag} = $_;
-      delete $mapping_rules->{$rtag};
     }
   }
-}
 
-my $resp = {
-  instances => [],
-  srs => [],
-  snapshots => [],
-  relationships => [],
-  pst => [],
-  stats => { instances=>0, srs=>0, snapshots=>0, relationships=>0, pst=>0, errors=>0 }
-};
+  my $resp = {
+    instances => [],
+    srs => [],
+    snapshots => [],
+    relationships => [],
+    pst => [],
+    stats => { instances=>0, srs=>0, snapshots=>0, relationships=>0, pst=>0, errors=>0 }
+  };
 
-foreach (@ARGV) {
-  my $infile = $_;
   if (! -e $infile) {
     die "Can't find raw Marc file!"
   } 
-  
-
-  my $dir = dirname($infile);
-  my $fn = basename($infile, '.mrc', '.marc', '.out');
 
   my $snapshot = make_snapshot();
   my $snapshot_id = $snapshot->{jobExecutionId};
@@ -521,7 +523,7 @@ foreach (@ARGV) {
   
   # open a collection of raw marc records
   $/ = "\x1D";
- 
+
   open RAW, "<:encoding(UTF-8)", $infile;
   my $inst_recs;
   my $srs_recs;
@@ -879,4 +881,35 @@ sub make_srs {
       $srs->{recordType} = 'MARC_BIB';
     }
     return $srs;
+}
+
+{
+  package OUF::API::Server;
+  
+  use HTTP::Server::Simple::CGI;
+  use base qw(HTTP::Server::Simple::CGI);
+
+  my %dispatch = (
+    '/marc2inst' => \&marc_inst,
+  );
+
+  sub handle_request {
+    my $self = shift;
+    my $cgi  = shift;
+   
+    my $path = $cgi->path_info();
+    my $handler = $dispatch{$path};
+ 
+    if (ref($handler) eq "marc2inst") {
+        print "HTTP/1.0 200 OK\r\n";
+        $handler->($cgi);
+         
+    } else {
+        print "HTTP/1.0 404 Not found\r\n";
+        print $cgi->header,
+              $cgi->start_html('Not found'),
+              $cgi->h1('Not found'),
+              $cgi->end_html;
+    }
+  }
 }
