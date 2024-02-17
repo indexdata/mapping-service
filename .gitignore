@@ -1,3 +1,2 @@
-config.json
-test/*.jsonl
-test/*.tsv
+config*.json
+cache/
