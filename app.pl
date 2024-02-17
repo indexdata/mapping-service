@@ -29,13 +29,52 @@ sub getConfig {
 my $conf = getConfig();
 my $rules_file = 'mapping-rules/default.json';
 
-my @refeps = ('contributor-name-types','contributor-types','alternative-title-types','classification-types','electronic-access-relationships',,'identifier-types','instance-formats','instance-note-types','instance-relationship-types','instance-statuses','instance-types','modes-of-issuance','nature-of-content-terms','statistical-code-types','statistical-codes','hrid-settings-storage/hrid-settings');
+my @refeps = ('contributor-name-types','contributor-types','alternative-title-types','classification-types','electronic-access-relationships',,'identifier-types','instance-formats','instance-note-types','instance-relationship-types','instance-statuses','instance-types','modes-of-issuance','nature-of-content-terms','statistical-code-types','statistical-codes');
 # @refeps = ('locations');
 my @hrefeps = ('call-number-types','holdings-note-types','holdings-types','holdings-sources','ill-policies','item-damaged-statuses','item-note-types','loan-types','locations','material-types','service-points','shelf-locations',);
 
-my $hrid_conf = {};
 my $tenant = $conf->{tenant};
+my $okapi = $conf->{okapi};
 my $cachePath = "$cacheDir/$tenant";
+
+my $jar = HTTP::CookieJar::LWP->new;
+my $ua = LWP::UserAgent->new(cookie_jar => $jar);
+
+sub okpost {
+  my $ep = shift;
+  my $pl = shift;
+  my $url = "$okapi/$ep";
+  my $payload = encode_json($pl);
+  my @h = ('content-type' => 'application/json', 'x-okapi-tenant' => $tenant);
+  my $res = $ua->post($url, @h, 'Content' => $payload);
+  if ($res->is_success) {
+    return $res->decoded_content;
+  } else {
+    return "ERROR: " . $res->decoded_content;
+  }
+} 
+
+sub okget {
+  my $ep = shift;
+  my $url = "$okapi/$ep";
+  my $res = $ua->get($url);
+  if ($res->is_success) {
+    my $body = $res->decoded_content;
+    return decode_json($body);
+  } else {
+    return 'ERROR: ' . $res->decoded_content;
+  }
+}
+
+sub oklogin {
+  my $user = shift;
+  my $pass = shift;
+  my $pl = { username=>$user, password=>$pass };
+  my $res = okpost('authn/login-with-expiry', $pl);
+  if ($res =~ /^ERROR: /) {
+    die $res . "\n";
+  }
+}
 
 sub putCache {
   my $refobj = shift;
@@ -54,21 +93,19 @@ sub getCache {
   return $refobj;
 }
 
+sub getHrid {
+  my $url = "hrid-settings-storage/hrid-settings";
+  my $json = okget($url);
+  my $curr = $json->{instances}->{currentNumber};
+  my $pre = $json->{instances}->{prefix};
+  my $hrid_conf = { 
+    inst => { cur => $curr, pre => $pre }
+  };
+  return $hrid_conf;
+}
+
 sub getRefData {
   my $refobj = {};
-  my $okapi = $conf->{okapi};
-  my $user = $conf->{username};
-  my $pass = $conf->{password}; 
-  my $url = "$okapi/authn/login-with-expiry";
-  my @h = ('content-type' => 'application/json', 'x-okapi-tenant' => $tenant);
-  my $pl = { username=>$user, password=>$pass };
-  my $payload = encode_json($pl);
-  my $jar = HTTP::CookieJar::LWP->new;
-  my $ua = LWP::UserAgent->new(cookie_jar => $jar);
-  my $res = $ua->post($url, @h, 'Content' => $payload);
-  if (!$res->is_success) {
-    die $res->decoded_content;
-  }
   foreach (@refeps) {
     my $url = "$okapi/$_?limit=500";
     my $res = $ua->get($url);
@@ -79,12 +116,6 @@ sub getRefData {
     my $json = eval { decode_json($body) };
     if ($@) {
       print "WARN $_ is not valid JSON!\n";
-    } elsif ($url =~ /hrid-settings/) {
-      my $curr = $json->{instances}->{currentNumber};
-      my $pre = $json->{instances}->{prefix};
-      $hrid_conf = { 
-        inst => { cur => $curr, pre => $pre }
-      };
     } else {
       foreach (keys %$json) {
         if ($_ ne 'totalRecords') {
@@ -113,6 +144,9 @@ sub getRefData {
   }
  return $refobj;
 }
+
+oklogin($conf->{username}, $conf->{password});
+my $hrid_conf = getHrid();
 my $refdata = getCache($cachePath);
 if (!$refdata) {
   $refdata = getRefData() if !$refdata;
