@@ -18,10 +18,13 @@ use Data::Dumper;
 
 my $start = time();
 my $cacheDir = 'cache';
+my $hrid_conf = {
+  inst => { pre=>'x', cur=>0 }
+};
 
 sub getConfig {
   local $/ = '';
-  open CONF, 'config.json' or die "Can't open config file!";
+  open CONF, 'config.json' or return {tenant=>'default', okapi=>''};
   my $j = decode_json(<CONF>);
   return $j;
 }
@@ -29,13 +32,12 @@ sub getConfig {
 my $conf = getConfig();
 my $rules_file = 'mapping-rules/default.json';
 
-my @refeps = ('contributor-name-types','contributor-types','alternative-title-types','classification-types','electronic-access-relationships',,'identifier-types','instance-formats','instance-note-types','instance-relationship-types','instance-statuses','instance-types','modes-of-issuance','nature-of-content-terms','statistical-code-types','statistical-codes');
-# @refeps = ('locations');
+my @refeps = ('contributor-name-types','contributor-types','alternative-title-types','classification-types','electronic-access-relationships','identifier-types','instance-formats','instance-note-types','instance-relationship-types','instance-statuses','instance-types','modes-of-issuance','nature-of-content-terms','statistical-code-types','statistical-codes');
 my @hrefeps = ('call-number-types','holdings-note-types','holdings-types','holdings-sources','ill-policies','item-damaged-statuses','item-note-types','loan-types','locations','material-types','service-points','shelf-locations',);
 
 my $tenant = $conf->{tenant};
 my $okapi = $conf->{okapi};
-my $cachePath = "$cacheDir/$tenant";
+my $cachePath = "$cacheDir/$tenant.json";
 
 my $jar = HTTP::CookieJar::LWP->new;
 my $ua = LWP::UserAgent->new(cookie_jar => $jar);
@@ -145,8 +147,10 @@ sub getRefData {
  return $refobj;
 }
 
-oklogin($conf->{username}, $conf->{password});
-my $hrid_conf = getHrid();
+if ($conf->{okapi}) {
+  oklogin($conf->{username}, $conf->{password});
+  $hrid_conf = getHrid();
+}
 my $refdata = getCache($cachePath);
 if (!$refdata) {
   $refdata = getRefData() if !$refdata;
@@ -806,6 +810,7 @@ foreach (@ARGV) {
   my $tt = time() - $start;
   $resp->{stats}->{total} = $count;
   $resp->{stats}->{timeSeconds} = $tt;
+  $resp->{stats}->{tenant} = $tenant;
   print $json->pretty->encode($resp);
 }
 

@@ -1,2 +1,3 @@
 config*.json
-cache/
+cache/*
+!cache/default.json
