@@ -1,6 +1,5 @@
 #!/usr/bin/perl
 
-# require './app.pl';
 use JSON;
 use strict;
 use warnings;
@@ -9,11 +8,19 @@ my $json = JSON->new;
 $json->canonical(1);
 $json->pretty(1);
 
+if (! -e 'stash') {
+  mkdir 'stash';
+}
+
 {
   package OUF::API::Server;
   
   use HTTP::Server::Simple::CGI;
   use base qw(HTTP::Server::Simple::CGI);
+  use Data::Dumper;
+
+  require './app.pl';
+  my $fcount = 0;
 
   my %dispatch = (
     '/' => \&resp_menu,
@@ -44,8 +51,13 @@ $json->pretty(1);
     my $cgi  = shift;
     return if !ref $cgi;
     my $method = $cgi->request_method();
-    my $blob = $cgi->Dump;
-    print $blob;
+    my $blob = $cgi->param('POSTDATA');
+    $fcount++;
+    my $fn = "stash/$fcount.mrc";
+    open STSH, '>', $fn or print "WARN Can't open stash file at $fn";
+    print STSH $blob;
+    close STSH;
+    mapper($fn);
   }
 
   sub resp_menu {

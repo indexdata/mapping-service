@@ -20,7 +20,6 @@ my $hrid_conf = {
   inst => { pre=>'x', cur=>0 }
 };
 
-my $start = time();
 
 sub getConfig {
   local $/ = '';
@@ -432,72 +431,71 @@ sub processing_funcs {
   return $out;
 }
 
+my $ftypes = {
+  id => 'string',
+  hrid => 'string',
+  source => 'string',
+  title => 'string',
+  indexTitle => 'string',
+  alternativeTitles => 'array.object',
+  editions => 'array',
+  series => 'array.object',
+  identifiers => 'array.object',
+  contributors => 'array.object',
+  subjects => 'array.object',
+  classifications => 'array.object',
+  publication => 'array.object',
+  publicationFrequency => 'array',
+  publicationRange => 'array',
+  electronicAccess => 'array.object',
+  instanceTypeId => 'string',
+  instanceFormatIds => 'array',
+  physicalDescriptions => 'array',
+  languages => 'array',
+  notes => 'array.object',
+  modeOfIssuanceId => 'string',
+  catalogedDate => 'string',
+  previouslyHeld => 'boolean',
+  staffSuppress => 'boolean',
+  discoverySuppress => 'boolean',
+  statisticalCodeIds => 'array',
+  sourceRecordFormat => 'string',
+  statusId => 'string',
+  statusUpdatedDate => 'string',
+  tags => 'object',
+  holdingsRecords2 => 'array.object',
+  natureOfContentTermIds => 'array.string'
+};
+my $mapping_rules = getRules($rules_file);
+# We need to know upfront which tags support repeated subfields or require preprocessing (think 880s).
+my $field_replace = {};
+my $repeat_subs = {};
+foreach (keys %{ $mapping_rules }) {
+  my $rtag = $_;
+  foreach (@{ $mapping_rules->{$rtag} }) {
+    if ($_->{entityPerRepeatedSubfield}) {
+      my $conf = $_;
+      foreach (@{ $conf->{entity} }) {
+        push @{ $repeat_subs->{$rtag} }, $_->{subfield}->[0] if $_->{target} !~ /Id$/;
+      }
+    }
+    if ($_->{fieldReplacementBy3Digits}) {
+      my $frules = {};
+      foreach (@{ $_->{fieldReplacementRule} }) {
+        $frules->{$_->{sourceDigits}} = $_->{targetField};
+      }
+      $_->{frules} = $frules;
+      $field_replace->{$rtag} = $_;
+      delete $mapping_rules->{$rtag};
+    }
+  }
+}
 # my $infile = shift;
 # mapper($infile);
 
 sub mapper {
   my $infile = shift || '';
-  my $mapping_rules = getRules($rules_file);
-
-  my $ftypes = {
-    id => 'string',
-    hrid => 'string',
-    source => 'string',
-    title => 'string',
-    indexTitle => 'string',
-    alternativeTitles => 'array.object',
-    editions => 'array',
-    series => 'array.object',
-    identifiers => 'array.object',
-    contributors => 'array.object',
-    subjects => 'array.object',
-    classifications => 'array.object',
-    publication => 'array.object',
-    publicationFrequency => 'array',
-    publicationRange => 'array',
-    electronicAccess => 'array.object',
-    instanceTypeId => 'string',
-    instanceFormatIds => 'array',
-    physicalDescriptions => 'array',
-    languages => 'array',
-    notes => 'array.object',
-    modeOfIssuanceId => 'string',
-    catalogedDate => 'string',
-    previouslyHeld => 'boolean',
-    staffSuppress => 'boolean',
-    discoverySuppress => 'boolean',
-    statisticalCodeIds => 'array',
-    sourceRecordFormat => 'string',
-    statusId => 'string',
-    statusUpdatedDate => 'string',
-    tags => 'object',
-    holdingsRecords2 => 'array.object',
-    natureOfContentTermIds => 'array.string'
-  };
-
-  # We need to know upfront which tags support repeated subfields or require preprocessing (think 880s).
-  my $field_replace = {};
-  my $repeat_subs = {};
-  foreach (keys %{ $mapping_rules }) {
-    my $rtag = $_;
-    foreach (@{ $mapping_rules->{$rtag} }) {
-      if ($_->{entityPerRepeatedSubfield}) {
-        my $conf = $_;
-        foreach (@{ $conf->{entity} }) {
-          push @{ $repeat_subs->{$rtag} }, $_->{subfield}->[0] if $_->{target} !~ /Id$/;
-        }
-      }
-      if ($_->{fieldReplacementBy3Digits}) {
-        my $frules = {};
-        foreach (@{ $_->{fieldReplacementRule} }) {
-          $frules->{$_->{sourceDigits}} = $_->{targetField};
-        }
-        $_->{frules} = $frules;
-        $field_replace->{$rtag} = $_;
-        delete $mapping_rules->{$rtag};
-      }
-    }
-  }
+  my $start = time();
 
   my $resp = {
     instances => [],
@@ -518,9 +516,10 @@ sub mapper {
   $resp->{stats}->{snapshots}++;
   
   # open a collection of raw marc records
-  $/ = "\x1D";
+  local $/ = "\x1D";
 
   open RAW, "<:encoding(UTF-8)", $infile;
+
   my $inst_recs;
   my $srs_recs;
   my $hrecs;
@@ -878,3 +877,4 @@ sub make_srs {
     }
     return $srs;
 }
+1;
