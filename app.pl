@@ -15,16 +15,12 @@ use HTTP::CookieJar::LWP;
 use Mozilla::CA;
 use Data::Dumper;
 
-my $port = '8888';
-my $pid = OUF::API::Server->new($port)->background();
-# print "PID: $pid\n";
-
-
-my $start = time();
 my $cacheDir = 'cache';
 my $hrid_conf = {
   inst => { pre=>'x', cur=>0 }
 };
+
+my $start = time();
 
 sub getConfig {
   local $/ = '';
@@ -881,35 +877,4 @@ sub make_srs {
       $srs->{recordType} = 'MARC_BIB';
     }
     return $srs;
-}
-
-{
-  package OUF::API::Server;
-  
-  use HTTP::Server::Simple::CGI;
-  use base qw(HTTP::Server::Simple::CGI);
-
-  my %dispatch = (
-    '/marc2inst' => \&marc_inst,
-  );
-
-  sub handle_request {
-    my $self = shift;
-    my $cgi  = shift;
-   
-    my $path = $cgi->path_info();
-    my $handler = $dispatch{$path};
- 
-    if (ref($handler) eq "marc2inst") {
-        print "HTTP/1.0 200 OK\r\n";
-        $handler->($cgi);
-         
-    } else {
-        print "HTTP/1.0 404 Not found\r\n";
-        print $cgi->header,
-              $cgi->start_html('Not found'),
-              $cgi->h1('Not found'),
-              $cgi->end_html;
-    }
-  }
 }
