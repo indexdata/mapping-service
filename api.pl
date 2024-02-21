@@ -18,6 +18,7 @@ if (! -e 'stash') {
   use HTTP::Server::Simple::CGI;
   use base qw(HTTP::Server::Simple::CGI);
   use Data::Dumper;
+  use open qw( :std :encoding(UTF-8) );
 
   require './app.pl';
   my $fcount = 0;
@@ -54,7 +55,7 @@ if (! -e 'stash') {
     my $blob = $cgi->param('POSTDATA');
     $fcount++;
     my $fn = "stash/$fcount.mrc";
-    open STSH, '>', $fn or print "WARN Can't open stash file at $fn";
+    open STSH, ">", $fn or print "WARN Can't open stash file at $fn";
     print STSH $blob;
     close STSH;
     mapper($fn);
