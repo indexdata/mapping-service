@@ -1,0 +1,485 @@
+{
+   "instances" : [
+      {
+         "alternativeTitles" : [],
+         "catalogedDate" : "2010-05-11",
+         "classifications" : [
+            {
+               "classificationNumber" : "ML395 .P5 2010",
+               "classificationTypeId" : "ce176ace-a53e-4b4d-aa89-725ed7b2edac"
+            },
+            {
+               "classificationNumber" : "781.65092277595 B",
+               "classificationTypeId" : "42471af9-7d25-4f3a-bf78-60d29dcf463b"
+            }
+         ],
+         "contributors" : [
+            {
+               "contributorNameTypeId" : "2b94c631-fca9-4892-a730-03ee529ffe2a",
+               "name" : "Pinkham, Derek J., 1970-",
+               "primary" : "true"
+            }
+         ],
+         "discoverySuppress" : false,
+         "editions" : [],
+         "electronicAccess" : [],
+         "holdingsRecords2" : [],
+         "hrid" : "16227113",
+         "id" : "f83c5833-5e70-5186-a754-d98b66f89761",
+         "identifiers" : [
+            {
+               "identifierTypeId" : "c858e4f2-2b6b-4385-842b-60732ee14abb",
+               "value" : "2010020021"
+            },
+            {
+               "identifierTypeId" : "8261054f-be78-422d-bd51-4ed9f33c3422",
+               "value" : "9780874620573 (pbk. : alk. paper)"
+            },
+            {
+               "identifierTypeId" : "8261054f-be78-422d-bd51-4ed9f33c3422",
+               "value" : "0874620570 (pbk. : alk. paper)"
+            },
+            {
+               "identifierTypeId" : "439bfbae-75bc-4f74-9fc7-b2a2d47ce3ef",
+               "value" : "(OCoLC)ocn614990371"
+            }
+         ],
+         "indexTitle" : "Milwaukee jazz profiles : lives and lessons of musicians from the Cream City /",
+         "instanceFormatIds" : [],
+         "instanceTypeId" : "6312d172-f0cf-40f6-b27d-9fa8feaf332f",
+         "languages" : [
+            "eng"
+         ],
+         "modeOfIssuanceId" : "9d18a02f-5897-4c31-9106-c9abb5c7ae8b",
+         "natureOfContentTermIds" : [],
+         "notes" : [
+            {
+               "instanceNoteTypeId" : "86b6e817-e1bc-42fb-bab0-70e7547de6c1",
+               "note" : "Includes bibliographical references and index",
+               "staffOnly" : "false"
+            },
+            {
+               "instanceNoteTypeId" : "5ba8e385-0e27-462e-a571-ffa1fa34ea54",
+               "note" : "Juli Wood -- Luis Diaz -- Eddie Allen -- Charles \"Chuck\" Ledvina -- Jamie Breiwick -- Dave Bayles -- Mike Plog -- David Hazeltine -- Frank Morgan -- Bill Martin -- Jim Paolo -- Keith Sarnow -- Brian Lynch -- Victor Campbell -- Jay Mollerskov -- Adekola Adadapo -- Jeff Hamann -- Mark Davis -- John Foshager -- Berkeley Fudge -- Dan Nimmer -- Jack Grassel -- Neil Chandek -- Philip Dizack -- Lynn Arriale -- Paul Silbergleit -- Scott Van Domelen -- Eric Jacobson -- Steve Einerson -- Mike Standal -- Brian Ritter -- Don Linke -- Manty Ellis -- Billy Johnson",
+               "staffOnly" : "false"
+            }
+         ],
+         "physicalDescriptions" : [
+            "216 p. : ill. ; 22 cm."
+         ],
+         "publication" : [
+            {
+               "dateOfPublication" : "c2010",
+               "place" : "Milwaukee, Wis.",
+               "publisher" : "Marquette University Press"
+            }
+         ],
+         "publicationFrequency" : [],
+         "publicationRange" : [],
+         "series" : [],
+         "source" : "MARC",
+         "staffSuppress" : false,
+         "statisticalCodeIds" : [],
+         "statusId" : "52a2ff34-2a12-420d-8539-21aa8d3cf5d8",
+         "subjects" : [
+            {
+               "value" : "Jazz musicians--Wisconsin--Milwaukee--Interviews"
+            },
+            {
+               "value" : "Jazz musicians--Wisconsin--Milwaukee--Biography"
+            }
+         ],
+         "tags" : {},
+         "title" : "Milwaukee jazz profiles : lives and lessons of musicians from the Cream City / by Derek J. Pinkham."
+      }
+   ],
+   "pst" : [],
+   "records" : [
+      {
+         "externalIdsHolder" : {
+            "instanceHrid" : "16227113",
+            "instanceId" : "f83c5833-5e70-5186-a754-d98b66f89761"
+         },
+         "generation" : 0,
+         "id" : "ab4571c9-ace4-5586-bb45-7d6dc5dbd467",
+         "matchedId" : "ab4571c9-ace4-5586-bb45-7d6dc5dbd467",
+         "parsedRecord" : {
+            "content" : {
+               "fields" : [
+                  {
+                     "001" : "16227113"
+                  },
+                  {
+                     "005" : "20110712110238.0"
+                  },
+                  {
+                     "008" : "100511s2010    wiua     b    001 0ceng  "
+                  },
+                  {
+                     "906" : {
+                        "ind1" : " ",
+                        "ind2" : " ",
+                        "subfields" : [
+                           {
+                              "a" : "7"
+                           },
+                           {
+                              "b" : "cbc"
+                           },
+                           {
+                              "c" : "orignew"
+                           },
+                           {
+                              "d" : "1"
+                           },
+                           {
+                              "e" : "ecip"
+                           },
+                           {
+                              "f" : "20"
+                           },
+                           {
+                              "g" : "y-gencatlg"
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "925" : {
+                        "ind1" : "0",
+                        "ind2" : " ",
+                        "subfields" : [
+                           {
+                              "a" : "acquire"
+                           },
+                           {
+                              "b" : "2 shelf copies"
+                           },
+                           {
+                              "x" : "policy default"
+                           },
+                           {
+                              "e" : "claim1  2010-10-20"
+                           },
+                           {
+                              "e" : "claim2  2011-02-14"
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "955" : {
+                        "ind1" : " ",
+                        "ind2" : " ",
+                        "subfields" : [
+                           {
+                              "a" : "vk00 2010-05-11"
+                           },
+                           {
+                              "b" : "vk13 2010-05-11"
+                           },
+                           {
+                              "i" : "vk13 2010-05-11"
+                           },
+                           {
+                              "e" : "vl34 2010-05-12 to Dewey"
+                           },
+                           {
+                              "w" : "rd03 2010-05-13"
+                           },
+                           {
+                              "f" : "vl34 2011-06-15 Z-CipVer MCIP to Music Division"
+                           },
+                           {
+                              "e" : "vl39 2011-06-17 to BCCD c.1"
+                           },
+                           {
+                              "t" : "rf18 2011-07-12 copy 2 added"
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "010" : {
+                        "ind1" : " ",
+                        "ind2" : " ",
+                        "subfields" : [
+                           {
+                              "a" : "  2010020021"
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "020" : {
+                        "ind1" : " ",
+                        "ind2" : " ",
+                        "subfields" : [
+                           {
+                              "a" : "9780874620573 (pbk. : alk. paper)"
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "020" : {
+                        "ind1" : " ",
+                        "ind2" : " ",
+                        "subfields" : [
+                           {
+                              "a" : "0874620570 (pbk. : alk. paper)"
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "035" : {
+                        "ind1" : " ",
+                        "ind2" : " ",
+                        "subfields" : [
+                           {
+                              "a" : "(OCoLC)ocn614990371"
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "040" : {
+                        "ind1" : " ",
+                        "ind2" : " ",
+                        "subfields" : [
+                           {
+                              "a" : "DLC"
+                           },
+                           {
+                              "c" : "DLC"
+                           },
+                           {
+                              "d" : "YDX"
+                           },
+                           {
+                              "d" : "CDX"
+                           },
+                           {
+                              "d" : "YDXCP"
+                           },
+                           {
+                              "d" : "DLC"
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "043" : {
+                        "ind1" : " ",
+                        "ind2" : " ",
+                        "subfields" : [
+                           {
+                              "a" : "n-us-wi"
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "050" : {
+                        "ind1" : "0",
+                        "ind2" : "0",
+                        "subfields" : [
+                           {
+                              "a" : "ML395"
+                           },
+                           {
+                              "b" : ".P5 2010"
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "082" : {
+                        "ind1" : "0",
+                        "ind2" : "0",
+                        "subfields" : [
+                           {
+                              "a" : "781.65092/277595"
+                           },
+                           {
+                              "a" : "B"
+                           },
+                           {
+                              "2" : "22"
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "100" : {
+                        "ind1" : "1",
+                        "ind2" : " ",
+                        "subfields" : [
+                           {
+                              "a" : "Pinkham, Derek J.,"
+                           },
+                           {
+                              "d" : "1970-"
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "245" : {
+                        "ind1" : "1",
+                        "ind2" : "0",
+                        "subfields" : [
+                           {
+                              "a" : "Milwaukee jazz profiles :"
+                           },
+                           {
+                              "b" : "lives and lessons of musicians from the Cream City /"
+                           },
+                           {
+                              "c" : "by Derek J. Pinkham."
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "260" : {
+                        "ind1" : " ",
+                        "ind2" : " ",
+                        "subfields" : [
+                           {
+                              "a" : "Milwaukee, Wis. :"
+                           },
+                           {
+                              "b" : "Marquette University Press,"
+                           },
+                           {
+                              "c" : "c2010."
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "300" : {
+                        "ind1" : " ",
+                        "ind2" : " ",
+                        "subfields" : [
+                           {
+                              "a" : "216 p. :"
+                           },
+                           {
+                              "b" : "ill. ;"
+                           },
+                           {
+                              "c" : "22 cm."
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "504" : {
+                        "ind1" : " ",
+                        "ind2" : " ",
+                        "subfields" : [
+                           {
+                              "a" : "Includes bibliographical references and index."
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "505" : {
+                        "ind1" : "0",
+                        "ind2" : " ",
+                        "subfields" : [
+                           {
+                              "a" : "Juli Wood -- Luis Diaz -- Eddie Allen -- Charles \"Chuck\" Ledvina -- Jamie Breiwick -- Dave Bayles -- Mike Plog -- David Hazeltine -- Frank Morgan -- Bill Martin -- Jim Paolo -- Keith Sarnow -- Brian Lynch -- Victor Campbell -- Jay Mollerskov -- Adekola Adadapo -- Jeff Hamann -- Mark Davis -- John Foshager -- Berkeley Fudge -- Dan Nimmer -- Jack Grassel -- Neil Chandek -- Philip Dizack -- Lynn Arriale -- Paul Silbergleit -- Scott Van Domelen -- Eric Jacobson -- Steve Einerson -- Mike Standal -- Brian Ritter -- Don Linke -- Manty Ellis -- Billy Johnson."
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "650" : {
+                        "ind1" : " ",
+                        "ind2" : "0",
+                        "subfields" : [
+                           {
+                              "a" : "Jazz musicians"
+                           },
+                           {
+                              "z" : "Wisconsin"
+                           },
+                           {
+                              "z" : "Milwaukee"
+                           },
+                           {
+                              "v" : "Interviews."
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "650" : {
+                        "ind1" : " ",
+                        "ind2" : "0",
+                        "subfields" : [
+                           {
+                              "a" : "Jazz musicians"
+                           },
+                           {
+                              "z" : "Wisconsin"
+                           },
+                           {
+                              "z" : "Milwaukee"
+                           },
+                           {
+                              "v" : "Biography."
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "999" : {
+                        "ind1" : "f",
+                        "ind2" : "f",
+                        "subfields" : [
+                           {
+                              "i" : "f83c5833-5e70-5186-a754-d98b66f89761"
+                           },
+                           {
+                              "s" : "ab4571c9-ace4-5586-bb45-7d6dc5dbd467"
+                           }
+                        ]
+                     }
+                  }
+               ],
+               "leader" : "01844cam a2200289 a 4500"
+            },
+            "id" : "ab4571c9-ace4-5586-bb45-7d6dc5dbd467"
+         },
+         "rawRecord" : {
+            "content" : "01844cam a2200289 a 4500001000900000005001700009008004100026906004500067925008400112955020500196010001700401020003800418020003500456035002400491040003500515043001200550050002000562082002800582100003000610245010600640260005900746300002900805504005100834505056200885650005401447650005301501\u001e16227113\u001e20110712110238.0\u001e100511s2010    wiua     b    001 0ceng  \u001e  \u001fa7\u001fbcbc\u001fcorignew\u001fd1\u001feecip\u001ff20\u001fgy-gencatlg\u001e0 \u001faacquire\u001fb2 shelf copies\u001fxpolicy default\u001feclaim1  2010-10-20\u001feclaim2  2011-02-14\u001e  \u001favk00 2010-05-11\u001fbvk13 2010-05-11\u001fivk13 2010-05-11\u001fevl34 2010-05-12 to Dewey\u001fwrd03 2010-05-13\u001ffvl34 2011-06-15 Z-CipVer MCIP to Music Division\u001fevl39 2011-06-17 to BCCD c.1\u001ftrf18 2011-07-12 copy 2 added\u001e  \u001fa  2010020021\u001e  \u001fa9780874620573 (pbk. : alk. paper)\u001e  \u001fa0874620570 (pbk. : alk. paper)\u001e  \u001fa(OCoLC)ocn614990371\u001e  \u001faDLC\u001fcDLC\u001fdYDX\u001fdCDX\u001fdYDXCP\u001fdDLC\u001e  \u001fan-us-wi\u001e00\u001faML395\u001fb.P5 2010\u001e00\u001fa781.65092/277595\u001faB\u001f222\u001e1 \u001faPinkham, Derek J.,\u001fd1970-\u001e10\u001faMilwaukee jazz profiles :\u001fblives and lessons of musicians from the Cream City /\u001fcby Derek J. Pinkham.\u001e  \u001faMilwaukee, Wis. :\u001fbMarquette University Press,\u001fcc2010.\u001e  \u001fa216 p. :\u001fbill. ;\u001fc22 cm.\u001e  \u001faIncludes bibliographical references and index.\u001e0 \u001faJuli Wood -- Luis Diaz -- Eddie Allen -- Charles \"Chuck\" Ledvina -- Jamie Breiwick -- Dave Bayles -- Mike Plog -- David Hazeltine -- Frank Morgan -- Bill Martin -- Jim Paolo -- Keith Sarnow -- Brian Lynch -- Victor Campbell -- Jay Mollerskov -- Adekola Adadapo -- Jeff Hamann -- Mark Davis -- John Foshager -- Berkeley Fudge -- Dan Nimmer -- Jack Grassel -- Neil Chandek -- Philip Dizack -- Lynn Arriale -- Paul Silbergleit -- Scott Van Domelen -- Eric Jacobson -- Steve Einerson -- Mike Standal -- Brian Ritter -- Don Linke -- Manty Ellis -- Billy Johnson.\u001e 0\u001faJazz musicians\u001fzWisconsin\u001fzMilwaukee\u001fvInterviews.\u001e 0\u001faJazz musicians\u001fzWisconsin\u001fzMilwaukee\u001fvBiography.\u001e\u001d",
+            "id" : "ab4571c9-ace4-5586-bb45-7d6dc5dbd467"
+         },
+         "recordType" : "MARC_BIB",
+         "snapshotId" : "c5dfb620-c72a-59db-8848-63204fa9a247"
+      }
+   ],
+   "relationships" : [],
+   "snapshot" : {
+      "jobExecutionId" : "c5dfb620-c72a-59db-8848-63204fa9a247",
+      "processingStartedDate" : "2024-02-22T00:00:00",
+      "status" : "COMMITTED"
+   },
+   "stats" : {
+      "errors" : 0,
+      "instances" : 1,
+      "pst" : 0,
+      "records" : 1,
+      "relationships" : 0,
+      "snapshots" : 1,
+      "tenant" : "indexdata",
+      "timeSeconds" : 0,
+      "total" : 1
+   }
+}

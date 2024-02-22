@@ -116,7 +116,7 @@ sub getRefData {
     }
     my $json = eval { decode_json($body) };
     if ($@) {
-      print "WARN $_ is not valid JSON!\n";
+      # print "WARN $_ is not valid JSON!\n";
     } else {
       foreach (keys %$json) {
         if ($_ ne 'totalRecords') {
@@ -499,11 +499,10 @@ sub mapper {
 
   my $resp = {
     instances => [],
-    srs => [],
-    snapshots => [],
+    records => [],
     relationships => [],
     pst => [],
-    stats => { instances=>0, srs=>0, snapshots=>0, relationships=>0, pst=>0, errors=>0 }
+    stats => { instances=>0, records=>0, snapshots=>0, relationships=>0, pst=>0, errors=>0 }
   };
 
   if (! -e $infile) {
@@ -512,7 +511,7 @@ sub mapper {
 
   my $snapshot = make_snapshot();
   my $snapshot_id = $snapshot->{jobExecutionId};
-  push @{ $resp->{snapshots} }, $snapshot;
+  $resp->{snapshot} = $snapshot;
   $resp->{stats}->{snapshots}++;
   
   # open a collection of raw marc records
@@ -571,8 +570,13 @@ sub mapper {
     my $prefix = $hrid_conf->{inst}->{pre};
     my $ctrlnum = sprintf("$prefix%011d", $cur_hrid);
 
-    my $f001 = MARC::Field->new('001', $ctrlnum);
-    $marc->insert_fields_ordered($f001);
+    my $f001 = $marc->field('001');
+    if ($f001) {
+      print STDERR Dumper($f001);
+    } else {
+      $f001 = MARC::Field->new('001', $ctrlnum);
+      $marc->insert_fields_ordered($f001);
+    }
 
     my $srsmarc = $marc;
     if ($marc->field('880')) {
@@ -743,7 +747,7 @@ sub mapper {
     }
     my $hrid = $rec->{hrid};
     if (!$hrids->{$hrid} && $marc->title()) {
-      
+      $rec->{id} = uuid($hrid);
       if ($relid) {
         my $superid = uuid($relid);
         my $rtype = $refdata->{instanceRelationshipTypes}->{'bound-with'};
@@ -753,10 +757,10 @@ sub mapper {
       }
       push @{ $resp->{instances} }, $rec;
       my $srs = make_srs($srsmarc, $raw, $rec->{id}, $rec->{hrid}, $snapshot_id);
-      push @{ $resp->{srs} }, $srs;
+      push @{ $resp->{records} }, $srs;
       $hrids->{$hrid} = 1;
       $resp->{stats}->{instances}++;
-      $resp->{stats}->{srs}++;
+      $resp->{stats}->{records}++;
 
       # make preceding succeding titles
       foreach my $f ($marc->field('78[05]')) {
@@ -798,10 +802,10 @@ sub mapper {
       } 
     } else {
       if ($hrids->{$hrid}) {
-        print "ERROR Duplicate HRID: $hrid\n";
+        # print "ERROR Duplicate HRID: $hrid\n";
       } 
       if (!$rec->{title}) {
-        print "ERROR $hrid has no title\n"
+        # print "ERROR $hrid has no title\n"
       }
       $resp->{stats}->{errors}++;
     }

@@ -1,3 +1,4 @@
 config*.json
 cache/*
 !cache/default.json
+stash/*
