@@ -561,7 +561,10 @@ sub mapper {
     my $marc = eval {
       MARC::Record->new_from_usmarc($raw);
     };
-    next unless $marc;
+    if (!$marc) {
+      $resp->{stats}->{errors}++;
+      next;
+    }
 
     $hrid_conf->{inst}->{cur}++;
     my $cur_hrid = $hrid_conf->{inst}->{cur};

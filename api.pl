@@ -52,11 +52,10 @@ if (! -e 'stash') {
     my $cgi  = shift;
     return if !ref $cgi;
     my $method = $cgi->request_method();
-    my $blob = $cgi->param('POSTDATA');
     $fcount++;
     my $fn = "stash/$fcount.mrc";
     open STSH, ">", $fn or print "WARN Can't open stash file at $fn";
-    print STSH $blob;
+    print STSH '' . $cgi->param('POSTDATA');
     close STSH;
     mapper($fn);
   }
@@ -76,6 +75,11 @@ if (! -e 'stash') {
 
 }
 
+$SIG{TERM} = sub { 
+  while (<stash/*>) {
+    unlink $_;
+  }
+  die "See ya later...\n";
+ };
 my $port = '8888';
 my $pid = OUF::API::Server->new($port)->background();
-print "PID: $pid\n";
