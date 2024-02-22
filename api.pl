@@ -19,7 +19,7 @@ $json->pretty(1);
   if (! -e 'stash') {
     mkdir 'stash';
   }
-  require './app.pl';
+  require './mapper.pl';
   my $fcount = 0;
 
   my %dispatch = (
