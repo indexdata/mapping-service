@@ -2,3 +2,5 @@ config*.json
 cache/*
 !cache/default.json
 stash/*
+test/bigger.mrc
+test/huge.mrc
