@@ -8,10 +8,6 @@ my $json = JSON->new;
 $json->canonical(1);
 $json->pretty(1);
 
-if (! -e 'stash') {
-  mkdir 'stash';
-}
-
 {
   package OUF::API::Server;
   
@@ -20,6 +16,9 @@ if (! -e 'stash') {
   use Data::Dumper;
   use open qw( :std :encoding(UTF-8) );
 
+  if (! -e 'stash') {
+    mkdir 'stash';
+  }
   require './app.pl';
   my $fcount = 0;
 

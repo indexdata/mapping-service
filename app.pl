@@ -572,7 +572,10 @@ sub mapper {
 
     my $f001 = $marc->field('001');
     if ($f001) {
-      print STDERR Dumper($f001);
+      my $d = $f001->data();
+      my $nf = MARC::Field->new('035', ' ', ' ', 'a' => $d);
+      $marc->insert_fields_ordered($nf);
+      $f001->data($ctrlnum);
     } else {
       $f001 = MARC::Field->new('001', $ctrlnum);
       $marc->insert_fields_ordered($f001);
