@@ -16,8 +16,12 @@ use Mozilla::CA;
 use Data::Dumper;
 
 my $cacheDir = 'cache';
+open LAST, '_last' or die "Can't find _last file";
+my $last = <LAST>;
+$last = chomp $last;
+close LAST;
 my $hrid_conf = {
-  inst => { pre=>'x', cur=>0 }
+  inst => { pre=>'x', cur=>$last }
 };
 
 
