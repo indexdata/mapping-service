@@ -55,6 +55,8 @@ $json->pretty(1);
       &not_allowed($cgi);
       return;
     }
+    my $hrid = $cgi->url_param('hridstart') || '';
+    my $hpre = $cgi->url_param('hridpre') || '';
     $fcount++;
     my $fn = "stash/$fcount.mrc";
     open STSH, ">", $fn or print "WARN Can't open stash file at $fn";
