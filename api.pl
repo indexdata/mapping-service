@@ -51,12 +51,17 @@ $json->pretty(1);
     my $cgi  = shift;
     return if !ref $cgi;
     my $method = $cgi->request_method();
+    if ($method ne 'POST') {
+      &not_allowed($cgi);
+      return;
+    }
     $fcount++;
     my $fn = "stash/$fcount.mrc";
     open STSH, ">", $fn or print "WARN Can't open stash file at $fn";
     print STSH '' . $cgi->param('POSTDATA');
     close STSH;
     mapper($fn);
+    return;
   }
 
   sub resp_menu {
@@ -70,6 +75,12 @@ $json->pretty(1);
       push @{ $out->{endpoints} }, $_;
     }
     print $json->encode($out);
+  }
+
+  sub not_allowed {
+    my $cgi = shift;
+    print '{ "error": { "status": "405", "message": "Method Not Allowed" } }';
+    return;
   }
 
 }
