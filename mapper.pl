@@ -18,7 +18,8 @@ use Data::Dumper;
 my $cacheDir = 'cache';
 open LAST, '_last' or die "Can't find _last file";
 my $last = <LAST>;
-$last = chomp $last;
+chomp $last;
+print $last . "\n";
 close LAST;
 my $hrid_conf = {
   inst => { pre=>'x', cur=>$last }
@@ -818,6 +819,11 @@ sub mapper {
     }
   }
 
+  $last = $hrid_conf->{inst}->{cur};
+  open LAST, ">_last";
+  print LAST $last . "\n";
+  close LAST;
+  print STDERR $last . "\n";
   my $tt = time() - $start;
   $resp->{stats}->{total} = $count;
   $resp->{stats}->{timeSeconds} = $tt;
